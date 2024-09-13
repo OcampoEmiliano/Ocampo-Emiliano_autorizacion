@@ -10,6 +10,7 @@ import { PORT } from "./config/env.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { todosRouter } from "./routes/todos.routes.js";
 
+
 const app = express();
 
 app.use(

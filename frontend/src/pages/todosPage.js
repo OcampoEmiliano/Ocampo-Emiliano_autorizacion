@@ -74,37 +74,51 @@ export const todosPage = () => {
   table.appendChild(tbody);
 
   container.appendChild(btnHome);
-  fetch("http://localhost:4000/todos")
-    .then((response) => response.json())
-    .then((data) => {
-      data.todos.forEach((todo) => {
-        if (todo.id > 10) return;
 
-        const tr = document.createElement("tr");
+const obtenerTareas = async () => {
+  try {
+    const response = await fetch('http://localhost:4000/todos', {
+      credentials: 'include'
+  })
+    if (!response.ok) {
+      throw new Error('Error al obtener las tareas');
+    }
+    const data = await response.json();
+    data.todos.forEach((todo) => {
+      if (todo.id > 10) return;
 
-        const td1 = document.createElement("td");
-        td1.classList.add("border", "px-4", "py-2");
-        td1.textContent = todo.id;
+      const tr = document.createElement("tr");
 
-        const td2 = document.createElement("td");
-        td2.classList.add("border", "px-4", "py-2");
-        td2.textContent = todo.title;
+      const td1 = document.createElement("td");
+      td1.classList.add("border", "px-4", "py-2");
+      td1.textContent = todo.id;
 
-        const td3 = document.createElement("td");
-        td3.classList.add("border", "px-4", "py-2");
-        td3.textContent = todo.completed ? "Sí" : "No";
+      const td2 = document.createElement("td");
+      td2.classList.add("border", "px-4", "py-2");
+      td2.textContent = todo.title;
 
-        const td4 = document.createElement("td");
-        td4.classList.add("border", "px-4", "py-2");
-        td4.textContent = todo.owner;
+      const td3 = document.createElement("td");
+      td3.classList.add("border", "px-4", "py-2");
+      td3.textContent = todo.completed ? "Sí" : "No";
 
-        tr.appendChild(td1);
-        tr.appendChild(td2);
-        tr.appendChild(td3);
-        tr.appendChild(td4);
-        tbody.appendChild(tr);
-      });
+      const td4 = document.createElement("td");
+      td4.classList.add("border", "px-4", "py-2");
+      td4.textContent = todo.owner;
+
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
+      tr.appendChild(td4);
+      tbody.appendChild(tr);
     });
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Hubo un problema al cargar las tareas');
+  }
+};
+
+obtenerTareas();
+
 
   container.appendChild(title);
   container.appendChild(table);
