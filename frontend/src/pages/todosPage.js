@@ -1,5 +1,7 @@
-import {todoForm} from './todoFormulario';
 import { deleteTodo } from './delete.js';
+import { crearTarea } from './crear.js';
+import { updateTodo } from './update.js';
+
 export const todosPage = () => {
   const container = document.createElement("div");
 
@@ -8,7 +10,6 @@ export const todosPage = () => {
     "flex-col",
     "items-center",
     "justify-center",
-    "h-screen",
     "bg-gray-200"
   );
 
@@ -40,52 +41,65 @@ export const todosPage = () => {
     "w-1/2",
     "bg-white",
     "shadow-md",
-    "h-[700px]",
+    "h-[500px]",
     "overflow-y-scroll"
   );
   const btnCreate = document.createElement("button");
 
-  btnCreate.classList.add(
-    "bg-green-500",
-    "text-white",
-    "p-2",
-    "rounded",
-    "hover:bg-green-600",
-    "mb-4"
-  );
+btnCreate.classList.add(
+  "bg-green-500",
+  "text-white",
+  "p-2",
+  "rounded",
+  "hover:bg-green-600",
+  "mb-4"
+);
 
-  btnCreate.textContent = "create todo";
-
-  btnCreate.addEventListener("click", () => {
-    const form = document.createElement('div');
-    form.innerHTML = `
-      <div id="container" class="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
-        <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-          <h1 class="text-2xl font-bold mb-4 text-center">Crear Nueva Tarea</h1>
-          <form id="todoForm" class="space-y-4">
-            <div>
-              <label for="title" class="block text-gray-700">Título:</label>
-              <input type="text" id="title" name="title" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-              <label for="completed" class="block text-gray-700">Completado:</label>
-              <input type="checkbox" id="completed" name="completed" class="mt-1">
-            </div>
-            <div class="flex justify-end space-x-4">
-              <button id="crearTarea" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Crear Tarea</button>
-              <button id="cancelar" type="button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancelar</button>
-            </div>
-          </form>
+const form = document.createElement('div');
+form.innerHTML = `
+  <div id="container" class="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+      <h1 class="text-2xl font-bold mb-4 text-center">Crear Nueva Tarea</h1>
+      <form id="todoForm" class="space-y-4">
+        <div>
+          <label for="title" class="block text-gray-700">Título:</label>
+          <input type="text" id="title" name="title" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
         </div>
-      </div>
-    `;
-    document.body.appendChild(form);
-  
-    // Agregar funcionalidad al botón de cancelar
-    document.getElementById('cancelar').addEventListener('click', () => {
-      form.remove();
-    });
+        <div>
+          <label for="completed" class="block text-gray-700">Completado:</label>
+          <input type="checkbox" id="completed" name="completed" class="mt-1">
+        </div>
+        <div class="flex justify-end space-x-4">
+          <button id="crear" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Crear Tarea</button>
+          <button id="cancelar" type="button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+`;
+
+btnCreate.textContent = "create todo";
+
+btnCreate.addEventListener("click", () => {
+  document.body.appendChild(form);
+
+  document.getElementById('crear').addEventListener('click', (event) => {
+    event.preventDefault();
+    const title = document.getElementById('title').value;
+  const completed = document.getElementById('completed').checked;
+  const tarea= {
+    title,
+    completed
+  }
+    addTodoToTable(crearTarea(tarea));
+    form.remove();
+  })
+  // Agregar funcionalidad al botón de cancelar
+  document.getElementById('cancelar').addEventListener('click', () => {
+    form.remove();
   });
+});
+
   
   const thead = document.createElement("thead");
   const tr = document.createElement("tr");
@@ -122,14 +136,24 @@ export const todosPage = () => {
   table.appendChild(tbody);
 
   container.appendChild(btnHome);
+  container.appendChild(title);
+  container.appendChild(btnCreate);
+  container.appendChild(table);
+
 fetch("http://localhost:4000/todos", {
   credentials: 'include'
 })
   .then((response) => response.json())
   .then((data) => {
     data.todos.forEach((todo) => {
-      if (todo.id > 10) return;
-
+      addTodoToTable(todo);
+    });
+  })
+  .catch((error) => {
+    console.error('Error fetching todos:', error);
+  });
+return container;
+  function addTodoToTable(todo) {
       const tr = document.createElement("tr");
 
       const td1 = document.createElement("td");
@@ -161,7 +185,49 @@ fetch("http://localhost:4000/todos", {
         "mb-4"
       );
       btnUpdate.textContent = "Update";
-      btnUpdate.addEventListener("click", todoForm); // Pasar referencia a la función
+      
+      btnUpdate.addEventListener("click", () => {
+        const formUpdate = document.createElement('div');
+formUpdate.innerHTML = `
+  <div id="container" class="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+      <h1 class="text-2xl font-bold mb-4 text-center">modificar ${todo.title}</h1>
+      <form id="updateForm" class="space-y-4">
+        <div>
+          <label for="title" class="block text-gray-700">Título:</label>
+          <input type="text" id="title" name="title" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div>
+          <label for="completed" class="block text-gray-700">Completado:</label>
+          <input type="checkbox" id="completed" name="completed" class="mt-1">
+        </div>
+        <div class="flex justify-end space-x-4">
+          <button id="update" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Crear Tarea</button>
+          <button id="cancelar" type="button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+`;
+        document.body.appendChild(formUpdate);
+        document.getElementById('update').addEventListener('click', (e)=> {
+          e.preventDefault();
+            const id = +todo.id;
+            const title = document.getElementById('title').value;
+            const completed = document.getElementById('completed').checked;
+          const tarea= {
+            id,
+            title,
+            completed
+          }
+            addTodoToTable(updateTodo(tarea));
+            formUpdate.remove();
+        });
+        // Agregar funcionalidad al botón de cancelar
+        document.getElementById('cancelar').addEventListener('click', () => {
+          formUpdate.remove();
+        });
+      });
 
       const btnDelete = document.createElement("button");
       btnDelete.classList.add(
@@ -185,15 +251,5 @@ fetch("http://localhost:4000/todos", {
       tr.appendChild(td5);
       tbody.appendChild(tr);
     
-    });
-  })
-  .catch((error) => {
-    console.error('Error fetching todos:', error);
-  });
-
-  container.appendChild(title);
-  container.appendChild(btnCreate);
-  container.appendChild(table);
-
-  return container;
+    }
 };

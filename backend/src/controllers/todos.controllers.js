@@ -7,6 +7,7 @@ export const getAllTodosCtrl = (req, res) => {
 
 export const createTodoCtrl = async (req, res) => {
   try {
+    database.todos.filter(todo => todo.owner === req.user.id);
     // Verificar si el usuario está autenticado
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: 'Usuario no autenticado' });
@@ -21,7 +22,7 @@ export const createTodoCtrl = async (req, res) => {
 
     const newTodo = {
       id: database.todos.length + 1,
-      title,
+      title: title,
       completed: completed !== undefined ? completed : false,
       owner: req.user.id
     };
@@ -29,7 +30,7 @@ export const createTodoCtrl = async (req, res) => {
     // Agregar el nuevo "todo" a la base de datos
     database.todos.push(newTodo);
 
-    return res.status(201).json(newTodo);
+    return res.status(201).json({ message: "tarea creada",newTodo});
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error al crear el todo' });
@@ -37,9 +38,17 @@ export const createTodoCtrl = async (req, res) => {
 };
 
 export const uptateTodoCtrl =(req, res) => {
-  const todoId = req.params.id;
-  const todos = database.todos.splice()
-  res.json({ todos })
+  const todoId = +req.params.id;
+  const { title, completed } = req.body;
+  database.todos.splice(todoId,1);
+
+  const todo = { id : req.params.id,
+      title: title,
+      completed: completed !== undefined ? completed : false,
+      owner: req.user.id
+  }
+  database.todos.push(todo)
+  return res.json({ message:"todo modificado",todo })
 };
 
 // Controlador para manejar la solicitud de eliminación
